@@ -69,7 +69,6 @@ export class SongController {
   }
 
   @Patch(':id/view')
-  @Public()
   async incrementViews(@Param('id') id: string, @User() user: IUserRequest) {
     // Truyền thêm userId nếu có (khách thì user?.userId sẽ undefined)
     return await this.songService.incrementViews(id, user?.userId);

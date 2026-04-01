@@ -2,8 +2,8 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@
 import { Public, ResponseMessage, User } from 'shared/decorators/customize';
 import { IUserRequest } from 'shared/interfaces';
 
-import { PlaylistService } from '../services/playlist.service';
 import { CreatePlaylistDto, UpdatePlaylistDto } from '../dtos';
+import { PlaylistService } from '../services/playlist.service';
 
 @Controller('playlists')
 export class PlaylistController {
@@ -49,12 +49,14 @@ export class PlaylistController {
   }
 
   @Get('songs/:id')
+    @Public()
   @ResponseMessage('Lấy danh sách bài hát của playlist thành công')
   async getPlaylistSongs(@Param('id') id: string) {
     return await this.playlistService.getPlaylistSongs(id);
   }
 
   @Get('detail/:id')
+  @Public()
   @ResponseMessage('Lấy ra thông tin chi tiết thành công')
   async getDetail(@Param('id') id: string) {
     return await this.playlistService.getDetail(id);
