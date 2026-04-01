@@ -1,0 +1,5 @@
+import { PartialType, OmitType } from '@nestjs/mapped-types';
+
+import { CreateArtistDto } from './create-artist.dto';
+
+export class UpdateArtistDto extends PartialType(OmitType(CreateArtistDto, ['userId'] as const)) {}
