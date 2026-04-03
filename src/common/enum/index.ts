@@ -11,6 +11,7 @@ export * from './purchase-history.enum';
 export * from './report-status.enum';
 export * from './report-target-type.enum';
 export * from './revenue-flow.enum';
+export * from './room.enum';
 export * from './song-feat-status.enum';
 export * from './song-status.enum';
 export * from './subscription.enum';

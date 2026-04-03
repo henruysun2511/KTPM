@@ -49,7 +49,7 @@ export class PlaylistController {
   }
 
   @Get('songs/:id')
-    @Public()
+  @Public()
   @ResponseMessage('Lấy danh sách bài hát của playlist thành công')
   async getPlaylistSongs(@Param('id') id: string) {
     return await this.playlistService.getPlaylistSongs(id);

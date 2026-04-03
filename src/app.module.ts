@@ -25,6 +25,7 @@ import { SearchModule } from 'modules/search/search.module';
 import { WorkerModule } from 'modules/worker/worker.module';
 import { NewsModule } from 'modules/news/news.module';
 import { SettingModule } from 'modules/setting/setting.module';
+import { RoomModule } from 'modules/rooms/room.module';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -110,6 +111,7 @@ import { SharedModule } from './shared/shared.module';
     RedisModule,
     AdvertisementModule,
     NewsModule,
+    RoomModule,
     WorkerModule,
     SettingModule
   ],

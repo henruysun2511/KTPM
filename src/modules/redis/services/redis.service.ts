@@ -47,6 +47,14 @@ export class RedisService {
     return this.redisClient.get(key);
   }
 
+  async incr(key: string) {
+    return this.redisClient.incr(key);
+  }
+
+  async expire(key: string, seconds: number) {
+    return this.redisClient.expire(key, seconds);
+  }
+
   async del(key: string) {
     return this.redisClient.del(key);
   }

@@ -36,7 +36,7 @@ export class CommentService {
     const pageSize = size || AppConfig.PAGINATION.SIZE_DEFAUT;
     const p = Math.max(1, Number(page) || 1);
     const skip = (p - 1) * pageSize;
-    
+
     const [data, total] = await Promise.all([
       this.commentRepo.getLatestComments(skip, pageSize),
       this.commentRepo.countTotalComments()

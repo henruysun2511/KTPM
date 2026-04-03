@@ -7,7 +7,7 @@ import { AlbumService } from '../services/album.service';
 
 @Controller('albums')
 export class AlbumController {
-  constructor(private readonly albumService: AlbumService) { }
+  constructor(private readonly albumService: AlbumService) {}
 
   @Post('')
   @ResponseMessage('Tạo album thành công')
