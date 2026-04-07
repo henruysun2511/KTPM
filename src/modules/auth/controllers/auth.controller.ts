@@ -40,9 +40,17 @@ export class AuthController {
       res.cookie('refreshToken', user.refreshToken, {
         httpOnly: true,
         sameSite: 'none',
+        secure: true,
         maxAge: ms(expireStr as ms.StringValue) // ms() sẽ trả ra số milliseconds,
       });
-      res.redirect(`${AppConfig.DOMAIN.FE}/auth/callback?token=${user.accessToken}`);
+
+      res.cookie('accessToken', user.accessToken, {
+        httpOnly: false, // Must be false so frontend JS can read it for now
+        sameSite: 'none',
+        secure: true,
+        maxAge: ms('15m')
+      });
+      res.redirect(`${AppConfig.DOMAIN.FE}/callback`);
     } catch {
       res.redirect(`${AppConfig.DOMAIN.BE}/api/v1/auth/error`);
     }
