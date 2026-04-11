@@ -2,10 +2,11 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestj
 import { Public, ResponseMessage, User } from 'shared/decorators/customize';
 import { IUserRequest } from 'shared/interfaces';
 
+import { Throttle } from '@nestjs/throttler';
 import {
   AddRoomQueueItemDto,
-  CreateRoomMessageDto,
   CreateRoomDto,
+  CreateRoomMessageDto,
   ModerateRoomParticipantDto,
   QueryRoomDto,
   SyncRoomPlaybackDto,
@@ -16,7 +17,7 @@ import { RoomService } from '../services/room.service';
 
 @Controller('rooms')
 export class RoomController {
-  constructor(private readonly roomService: RoomService) {}
+  constructor(private readonly roomService: RoomService) { }
 
   @Public()
   @Get('')
@@ -97,6 +98,7 @@ export class RoomController {
     return this.roomService.getMessages(id, page, size);
   }
 
+  @Throttle({ default: { limit: 1, ttl: 2000 } })
   @Post(':id/messages')
   @ResponseMessage('Tao binh luan phong thanh cong')
   createMessage(@Param('id') id: string, @Body() dto: CreateRoomMessageDto, @User() user: IUserRequest) {

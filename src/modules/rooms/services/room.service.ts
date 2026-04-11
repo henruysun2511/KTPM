@@ -22,6 +22,11 @@ import { SongService } from 'modules/songs/services/song.service';
 import { IUserRequest } from 'shared/interfaces';
 import { checkMongoId } from 'shared/utils/validateMongoId.util';
 
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { InjectConnection } from '@nestjs/mongoose';
+import { Cache } from 'cache-manager'; // Đảm bảo dòng này đúng
+import { RedisService } from 'modules/redis/services/redis.service';
+import { Connection, Types } from 'mongoose';
 import {
   AddRoomQueueItemDto,
   CreateRoomDto,
@@ -67,8 +72,11 @@ export class RoomService {
     private readonly playlistService: PlaylistService,
     private readonly albumService: AlbumService,
     @Inject(forwardRef(() => RoomGateway))
-    private readonly roomGateway: RoomGateway
-  ) {}
+    private readonly roomGateway: RoomGateway,
+    private readonly redisService: RedisService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @InjectConnection() private readonly connection: Connection,
+  ) { }
 
   async create(createRoomDto: CreateRoomDto, user: IUserRequest) {
     const activeRoom = await this.roomRepo.findOneActiveByHostId(user.userId);
@@ -506,22 +514,62 @@ export class RoomService {
     return { success: true };
   }
 
+  // async createMessage(roomId: string, dto: CreateRoomMessageDto, userId: string) {
+  //   const room = await this.ensureRoomAccessible(roomId, userId);
+  //   if (this.getRoomHostId(room) !== userId) {
+  //     await this.ensureActiveParticipant(roomId, userId);
+  //   }
+
+  //   await this.roomMessageRepo.create({
+  //     roomId,
+  //     userId,
+  //     content: dto.content,
+  //     createdBy: userId
+  //   });
+
+  //   const latest = (await this.roomMessageRepo.findByRoomId(roomId, 0, 1))[0];
+  //   this.roomGateway.broadcastMessage(roomId, latest);
+  //   return latest;
+  // }
+
   async createMessage(roomId: string, dto: CreateRoomMessageDto, userId: string) {
-    const room = await this.ensureRoomAccessible(roomId, userId);
-    if (this.getRoomHostId(room) !== userId) {
+    const { content } = dto;
+
+    const participantCacheKey = `room_active_user:${roomId}:${userId}`;
+    let isActive = await this.cacheManager.get(participantCacheKey);
+
+    if (!isActive) {
       await this.ensureActiveParticipant(roomId, userId);
+      await this.cacheManager.set(participantCacheKey, true, 300000);
     }
+    const session = await this.connection.startSession();
+    session.startTransaction();
 
-    await this.roomMessageRepo.create({
-      roomId,
-      userId,
-      content: dto.content,
-      createdBy: userId
-    });
+    try {
+      const messageData = {
+        content,
+        roomId: new Types.ObjectId(roomId),
+        userId: new Types.ObjectId(userId),
+      };
+      const message = await this.roomMessageRepo.create(messageData);
 
-    const latest = (await this.roomMessageRepo.findByRoomId(roomId, 0, 1))[0];
-    this.roomGateway.broadcastMessage(roomId, latest);
-    return latest;
+      await session.commitTransaction();
+
+      this.roomGateway.server.to(roomId).emit('new-message', message);
+
+      try {
+        await this.redisService.zincrby('rooms:activity', 1, roomId);
+      } catch (e) {
+      }
+
+      return message;
+
+    } catch (err) {
+      await session.abortTransaction();
+      throw err;
+    } finally {
+      await session.endSession();
+    }
   }
 
   async handleHostControl(dto: RoomControlDto, userId: string) {

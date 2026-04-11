@@ -1,10 +1,12 @@
-import { JwtModule } from '@nestjs/jwt';
 import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AlbumModule } from 'modules/album/album.module';
 import { PlaylistModule } from 'modules/playlist/playlist.module';
 import { SongModule } from 'modules/songs/song.module';
 
+import { CacheModule } from '@nestjs/cache-manager';
+import { RedisModule } from 'modules/redis/redis.module';
 import { RoomController } from './controllers/room.controller';
 import { RoomGateway } from './gateways/room.gateway';
 import { RoomMessageRepository } from './repositories/room-message.repository';
@@ -28,7 +30,12 @@ import { RoomService } from './services/room.service';
     JwtModule,
     SongModule,
     PlaylistModule,
-    AlbumModule
+    AlbumModule,
+    RedisModule,
+    CacheModule.register({
+      ttl: 300,
+      max: 1000,
+    }),
   ],
   controllers: [RoomController],
   providers: [
@@ -41,4 +48,4 @@ import { RoomService } from './services/room.service';
   ],
   exports: [RoomService]
 })
-export class RoomModule {}
+export class RoomModule { }
