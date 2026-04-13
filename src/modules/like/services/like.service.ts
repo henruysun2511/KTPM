@@ -1,14 +1,13 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { InjectConnection } from '@nestjs/mongoose';
 import { ArtistService } from 'modules/artist/services/artist.service';
 import { NotificationService } from 'modules/notification/services/notification.service';
-import { IUserRequest } from 'shared/interfaces';
-import { Connection } from 'mongoose';
-import { InjectConnection } from '@nestjs/mongoose';
 import { RedisService } from 'modules/redis/services/redis.service';
-
+import { Connection } from 'mongoose';
+import { IUserRequest } from 'shared/interfaces';
 import { SongService } from '../../songs/services/song.service';
-import { LikeRepository } from '../repositories/like.repository';
 import { CreateLikeDto, QueryLikeDto } from '../dtos';
+import { LikeRepository } from '../repositories/like.repository';
 
 @Injectable()
 export class LikeService {
@@ -19,7 +18,7 @@ export class LikeService {
     private readonly notificationService: NotificationService,
     private readonly redisService: RedisService,
     @InjectConnection() private readonly connection: Connection
-  ) {}
+  ) { }
 
   // Like
   // ...existing code...

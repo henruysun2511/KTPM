@@ -555,8 +555,7 @@ export class RoomService {
 
       await session.commitTransaction();
 
-      this.roomGateway.server.to(roomId).emit('new-message', message);
-
+      this.roomGateway.broadcastMessage(roomId, message);
       try {
         await this.redisService.zincrby('rooms:activity', 1, roomId);
       } catch (e) {
